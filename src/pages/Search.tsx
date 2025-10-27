@@ -147,9 +147,35 @@ const Search = () => {
     }
   };
 
-  const handleSearch = () => {
-    if (searchQuery.trim()) {
-      setResults(mockProperties);
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
+    
+    if (!selectedVillage) {
+      console.error('Please select a village before searching');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/bhulekh-proxy`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          act: 'sbksn',
+          kcn: searchQuery,
+          vcc: selectedVillage
+        })
+      });
+      const data = await response.json();
+      console.log('Search response:', data);
+      setResults(data || []);
+    } catch (error) {
+      console.error('Error searching:', error);
+      setResults([]);
+    } finally {
+      setLoading(false);
     }
   };
 
