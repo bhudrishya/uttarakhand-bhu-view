@@ -20,9 +20,13 @@ type Tehsil = {
 };
 
 type Village = {
-  village_name: string;
-  village_code: string;
-  village_name_english: string;
+  vname: string;
+  village_code_census: string;
+  vname_eng: string;
+  pname: string;
+  flg_chakbandi: string;
+  flg_survey: string;
+  pargana_code_new: string;
 };
 
 const mockProperties = [
@@ -204,8 +208,8 @@ const Search = () => {
                       </SelectTrigger>
                       <SelectContent>
                         {villages.map((village) => (
-                          <SelectItem key={village.village_code} value={village.village_code}>
-                            {village.village_name_english}
+                          <SelectItem key={village.village_code_census} value={village.village_code_census}>
+                            {village.vname_eng}
                           </SelectItem>
                         ))}
                       </SelectContent>
