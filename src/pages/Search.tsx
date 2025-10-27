@@ -1,10 +1,29 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search as SearchIcon, MapPin, User, FileText } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { Link } from "react-router-dom";
+
+type District = {
+  district_name: string;
+  district_code_census: string;
+  district_name_english: string;
+};
+
+type Tehsil = {
+  tehsil_name: string;
+  tehsil_code_census: string;
+  tehsil_name_english: string;
+};
+
+type Village = {
+  village_name: string;
+  village_code: string;
+  village_name_english: string;
+};
 
 const mockProperties = [
   {
@@ -33,6 +52,95 @@ const Search = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchType, setSearchType] = useState<"khasra" | "owner">("khasra");
   const [results, setResults] = useState<typeof mockProperties>([]);
+  
+  const [districts, setDistricts] = useState<District[]>([]);
+  const [tehsils, setTehsils] = useState<Tehsil[]>([]);
+  const [villages, setVillages] = useState<Village[]>([]);
+  
+  const [selectedDistrict, setSelectedDistrict] = useState("");
+  const [selectedTehsil, setSelectedTehsil] = useState("");
+  const [selectedVillage, setSelectedVillage] = useState("");
+  
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchDistricts();
+  }, []);
+
+  useEffect(() => {
+    if (selectedDistrict) {
+      fetchTehsils(selectedDistrict);
+      setSelectedTehsil("");
+      setSelectedVillage("");
+      setTehsils([]);
+      setVillages([]);
+    }
+  }, [selectedDistrict]);
+
+  useEffect(() => {
+    if (selectedDistrict && selectedTehsil) {
+      fetchVillages(selectedDistrict, selectedTehsil);
+      setSelectedVillage("");
+      setVillages([]);
+    }
+  }, [selectedTehsil]);
+
+  const fetchDistricts = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('https://bhulekh.uk.gov.in/public/public_ror/action/public_action.jsp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'act=fillDistrict'
+      });
+      const data = await response.json();
+      setDistricts(data);
+    } catch (error) {
+      console.error('Error fetching districts:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchTehsils = async (districtCode: string) => {
+    setLoading(true);
+    try {
+      const response = await fetch('https://bhulekh.uk.gov.in/public/public_ror/action/public_action.jsp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `act=fillTehsil&district_code=${districtCode}`
+      });
+      const data = await response.json();
+      setTehsils(data);
+    } catch (error) {
+      console.error('Error fetching tehsils:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchVillages = async (districtCode: string, tehsilCode: string) => {
+    setLoading(true);
+    try {
+      const response = await fetch('https://bhulekh.uk.gov.in/public/public_ror/action/public_action.jsp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `act=fillVillage&district_code=${districtCode}&tehsil_code=${tehsilCode}`
+      });
+      const data = await response.json();
+      setVillages(data);
+    } catch (error) {
+      console.error('Error fetching villages:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
@@ -53,41 +161,93 @@ const Search = () => {
 
           <Card className="mb-8">
             <CardContent className="pt-6">
-              <div className="flex flex-col md:flex-row gap-4 mb-4">
+              <div className="space-y-4">
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">District</label>
+                    <Select value={selectedDistrict} onValueChange={setSelectedDistrict}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select District" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {districts.map((district) => (
+                          <SelectItem key={district.district_code_census} value={district.district_code_census}>
+                            {district.district_name_english}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Tehsil</label>
+                    <Select value={selectedTehsil} onValueChange={setSelectedTehsil} disabled={!selectedDistrict}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Tehsil" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {tehsils.map((tehsil) => (
+                          <SelectItem key={tehsil.tehsil_code_census} value={tehsil.tehsil_code_census}>
+                            {tehsil.tehsil_name_english}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Village</label>
+                    <Select value={selectedVillage} onValueChange={setSelectedVillage} disabled={!selectedTehsil}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Village" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {villages.map((village) => (
+                          <SelectItem key={village.village_code} value={village.village_code}>
+                            {village.village_name_english}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="flex flex-col md:flex-row gap-4">
+                  <div className="flex gap-2">
+                    <Button
+                      variant={searchType === "khasra" ? "default" : "outline"}
+                      onClick={() => setSearchType("khasra")}
+                    >
+                      <FileText className="w-4 h-4 mr-2" />
+                      Khasra
+                    </Button>
+                    <Button
+                      variant={searchType === "owner" ? "default" : "outline"}
+                      onClick={() => setSearchType("owner")}
+                    >
+                      <User className="w-4 h-4 mr-2" />
+                      Owner
+                    </Button>
+                  </div>
+                </div>
+
                 <div className="flex gap-2">
-                  <Button
-                    variant={searchType === "khasra" ? "default" : "outline"}
-                    onClick={() => setSearchType("khasra")}
-                  >
-                    <FileText className="w-4 h-4" />
-                    Khasra
-                  </Button>
-                  <Button
-                    variant={searchType === "owner" ? "default" : "outline"}
-                    onClick={() => setSearchType("owner")}
-                  >
-                    <User className="w-4 h-4" />
-                    Owner
+                  <Input
+                    placeholder={
+                      searchType === "khasra"
+                        ? "Enter Khasra number (e.g., 245/1)"
+                        : "Enter owner name"
+                    }
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                    className="flex-1"
+                  />
+                  <Button onClick={handleSearch} disabled={loading}>
+                    <SearchIcon className="w-4 h-4 mr-2" />
+                    Search
                   </Button>
                 </div>
-              </div>
-
-              <div className="flex gap-2">
-                <Input
-                  placeholder={
-                    searchType === "khasra"
-                      ? "Enter Khasra number (e.g., 245/1)"
-                      : "Enter owner name"
-                  }
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                  className="flex-1"
-                />
-                <Button onClick={handleSearch}>
-                  <SearchIcon className="w-4 h-4" />
-                  Search
-                </Button>
               </div>
             </CardContent>
           </Card>
