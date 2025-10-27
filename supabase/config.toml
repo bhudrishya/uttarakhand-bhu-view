@@ -1,1 +1,4 @@
 project_id = "vrfvxmsqzdszicetnkez"
+
+[functions.bhulekh-proxy]
+verify_jwt = false

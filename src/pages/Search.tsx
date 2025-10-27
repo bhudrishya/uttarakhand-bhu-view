@@ -85,12 +85,12 @@ const Search = () => {
   const fetchDistricts = async () => {
     setLoading(true);
     try {
-      const response = await fetch('https://bhulekh.uk.gov.in/public/public_ror/action/public_action.jsp', {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/bhulekh-proxy`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/json',
         },
-        body: 'act=fillDistrict'
+        body: JSON.stringify({ act: 'fillDistrict' })
       });
       const data = await response.json();
       setDistricts(data);
@@ -104,12 +104,12 @@ const Search = () => {
   const fetchTehsils = async (districtCode: string) => {
     setLoading(true);
     try {
-      const response = await fetch('https://bhulekh.uk.gov.in/public/public_ror/action/public_action.jsp', {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/bhulekh-proxy`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/json',
         },
-        body: `act=fillTehsil&district_code=${districtCode}`
+        body: JSON.stringify({ act: 'fillTehsil', district_code: districtCode })
       });
       const data = await response.json();
       setTehsils(data);
@@ -123,12 +123,16 @@ const Search = () => {
   const fetchVillages = async (districtCode: string, tehsilCode: string) => {
     setLoading(true);
     try {
-      const response = await fetch('https://bhulekh.uk.gov.in/public/public_ror/action/public_action.jsp', {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/bhulekh-proxy`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/json',
         },
-        body: `act=fillVillage&district_code=${districtCode}&tehsil_code=${tehsilCode}`
+        body: JSON.stringify({ 
+          act: 'fillVillage', 
+          district_code: districtCode, 
+          tehsil_code: tehsilCode 
+        })
       });
       const data = await response.json();
       setVillages(data);
