@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import { MapPin} from "lucide-react";
 
 const PropertyDetails = () => {
   const { id } = useParams();
@@ -55,7 +56,14 @@ const PropertyDetails = () => {
           <h1 className="text-3xl md:text-4xl font-bold mb-6">
             Property Details
           </h1>
-
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+           <Link to="/map">
+                <Button variant="hero" size="lg" className="text-lg px-8 text-black">
+                <MapPin className="w-5 h-5" />
+                View On Map
+              </Button>
+            </Link>
+            </div>
           {loading ? (
             <Card>
               <CardContent className="py-12 text-center">
@@ -70,8 +78,11 @@ const PropertyDetails = () => {
                   className="w-full min-h-[800px] border-0"
                   title="Property Details Report"
                 />
+          
               </CardContent>
             </Card>
+        
+            
           ) : (
             <Card>
               <CardContent className="py-12 text-center">
