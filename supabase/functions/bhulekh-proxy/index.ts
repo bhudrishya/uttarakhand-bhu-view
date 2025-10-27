@@ -11,8 +11,29 @@ serve(async (req) => {
   }
 
   try {
-    const { act, district_code, tehsil_code, kcn, vcc } = await req.json();
+    const { act, district_code, tehsil_code, kcn, vcc, khata_number, village_code, pargana_code, fasli_code } = await req.json();
     
+    // Handle property details report request
+    if (act === 'getReport') {
+      const reportBody = `khata_number=${khata_number}&district_code=${district_code}&tehsil_code=${tehsil_code}&village_code=${village_code}&pargana_code=${pargana_code}&fasli_code=${fasli_code}`;
+      
+      const response = await fetch('https://bhulekh.uk.gov.in/public/public_ror/public_ror_report.jsp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Referer': 'https://bhulekh.uk.gov.in/public/public_ror/Public_ROR.jsp'
+        },
+        body: reportBody
+      });
+
+      const html = await response.text();
+
+      return new Response(JSON.stringify({ html }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
+    // Handle other API requests
     let body = `act=${act}`;
     if (district_code) body += `&district_code=${district_code}`;
     if (tehsil_code) body += `&tehsil_code=${tehsil_code}`;

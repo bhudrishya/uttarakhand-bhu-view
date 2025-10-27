@@ -29,33 +29,16 @@ type Village = {
   pargana_code_new: string;
 };
 
-const mockProperties = [
-  {
-    id: "1",
-    khasraNumber: "245/1",
-    ownerName: "Rajesh Kumar Sharma",
-    area: "1200 sq.m",
-    location: "Dehradun, Uttarakhand",
-    district: "Dehradun",
-    tehsil: "Sadar",
-    village: "Rajpur",
-  },
-  {
-    id: "2",
-    khasraNumber: "156/3",
-    ownerName: "Sunita Devi",
-    area: "800 sq.m",
-    location: "Haridwar, Uttarakhand",
-    district: "Haridwar",
-    tehsil: "Roorkee",
-    village: "Manglaur",
-  },
-];
+type PropertyResult = {
+  khata_number: string;
+  khasra_number: string;
+  unique_gata_id: string;
+};
 
 const Search = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchType, setSearchType] = useState<"khasra" | "owner">("khasra");
-  const [results, setResults] = useState<typeof mockProperties>([]);
+  const [results, setResults] = useState<PropertyResult[]>([]);
   
   const [districts, setDistricts] = useState<District[]>([]);
   const [tehsils, setTehsils] = useState<Tehsil[]>([]);
@@ -286,46 +269,45 @@ const Search = () => {
           {results.length > 0 && (
             <div className="space-y-4">
               <h2 className="text-2xl font-semibold mb-4">Search Results</h2>
-              {results.map((property) => (
-                <Card key={property.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <CardTitle className="flex items-start justify-between">
-                      <span>Khasra No: {property.khasraNumber}</span>
-                      <Link to={`/property/${property.id}`}>
-                        <Button variant="outline" size="sm">
-                          View Details
-                        </Button>
-                      </Link>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-sm">
-                          <User className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-muted-foreground">Owner:</span>
-                          <span className="font-medium">{property.ownerName}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <MapPin className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-muted-foreground">Location:</span>
-                          <span className="font-medium">{property.location}</span>
-                        </div>
-                      </div>
+              {results.map((property, index) => {
+                const selectedVillageData = villages.find(v => v.village_code_census === selectedVillage);
+                return (
+                  <Card key={index} className="hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <CardTitle className="flex items-start justify-between">
+                        <span>Khasra No: {property.khasra_number}</span>
+                        <Link 
+                          to={`/property/${property.unique_gata_id}`}
+                          state={{
+                            khata_number: property.khata_number,
+                            district_code: selectedDistrict,
+                            tehsil_code: selectedTehsil,
+                            village_code: selectedVillage,
+                            pargana_code: selectedVillageData?.pargana_code_new || '',
+                            fasli_code: '999'
+                          }}
+                        >
+                          <Button variant="outline" size="sm">
+                            View Details
+                          </Button>
+                        </Link>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
                       <div className="space-y-2">
                         <div className="text-sm">
-                          <span className="text-muted-foreground">Area:</span>{" "}
-                          <span className="font-medium">{property.area}</span>
+                          <span className="text-muted-foreground">Khata Number:</span>{" "}
+                          <span className="font-medium">{property.khata_number}</span>
                         </div>
                         <div className="text-sm">
-                          <span className="text-muted-foreground">Village:</span>{" "}
-                          <span className="font-medium">{property.village}</span>
+                          <span className="text-muted-foreground">Unique Gata ID:</span>{" "}
+                          <span className="font-medium">{property.unique_gata_id}</span>
                         </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           )}
 
