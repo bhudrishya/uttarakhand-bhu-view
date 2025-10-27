@@ -277,7 +277,7 @@ const Search = () => {
                       <CardTitle className="flex items-start justify-between">
                         <span>Khasra No: {property.khasra_number}</span>
                         <Link 
-                          to={`/property/${property.unique_gata_id}`}
+                          to={`/property/`}
                           state={{
                             khata_number: property.khata_number,
                             district_code: selectedDistrict,
