@@ -63,9 +63,6 @@ const Search = () => {
   
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    fetchDistricts();
-  }, []);
 
   useEffect(() => {
     if (selectedDistrict) {
@@ -165,7 +162,7 @@ const Search = () => {
                 <div className="grid md:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">District</label>
-                    <Select value={selectedDistrict} onValueChange={setSelectedDistrict}>
+                    <Select value={selectedDistrict} onValueChange={setSelectedDistrict} onOpenChange={(open) => open && districts.length === 0 && fetchDistricts()}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select District" />
                       </SelectTrigger>
