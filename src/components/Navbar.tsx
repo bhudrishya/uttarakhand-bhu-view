@@ -1,11 +1,15 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, MapPin } from "lucide-react";
+import { Menu, X, MapPin, LogOut, User } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import LoginDialog from "./LoginDialog";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
   const location = useLocation();
+  const { user, signOut } = useAuth();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -45,9 +49,22 @@ const Navbar = () => {
             >
               Map View
             </Link>
-            <Link to="/login">
-              <Button variant="default" size="sm">Login</Button>
-            </Link>
+            {user ? (
+              <>
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <User className="w-4 h-4" />
+                  Profile
+                </Button>
+                <Button variant="outline" size="sm" onClick={signOut} className="gap-2">
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <Button variant="default" size="sm" onClick={() => setShowLoginDialog(true)}>
+                Login
+              </Button>
+            )}
           </div>
 
           <button
@@ -87,12 +104,27 @@ const Navbar = () => {
             >
               Map View
             </Link>
-            <Link to="/login" onClick={() => setIsOpen(false)}>
-              <Button variant="default" size="sm" className="w-full">Login</Button>
-            </Link>
+            {user ? (
+              <div className="space-y-2">
+                <Button variant="ghost" size="sm" className="w-full gap-2" onClick={() => setIsOpen(false)}>
+                  <User className="w-4 h-4" />
+                  Profile
+                </Button>
+                <Button variant="outline" size="sm" className="w-full gap-2" onClick={() => { signOut(); setIsOpen(false); }}>
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </Button>
+              </div>
+            ) : (
+              <Button variant="default" size="sm" className="w-full" onClick={() => { setShowLoginDialog(true); setIsOpen(false); }}>
+                Login
+              </Button>
+            )}
           </div>
         )}
       </div>
+      
+      <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
     </nav>
   );
 };

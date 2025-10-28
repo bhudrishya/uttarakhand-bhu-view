@@ -1,8 +1,10 @@
-import { Navigate } from 'react-router-dom';
+import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import LoginDialog from './LoginDialog';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
 
   if (loading) {
     return (
@@ -16,7 +18,14 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return (
+      <>
+        <LoginDialog open={true} onOpenChange={setShowLoginDialog} />
+        <div className="min-h-screen flex items-center justify-center bg-background blur-sm">
+          {children}
+        </div>
+      </>
+    );
   }
 
   return <>{children}</>;
