@@ -2,15 +2,31 @@ import { useState, useEffect } from "react";
 import { useParams, useLocation, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, MapPin, ChevronDown, ChevronUp } from "lucide-react";
 import Navbar from "@/components/Navbar";
-import { MapPin} from "lucide-react";
+import PropertyMap from "@/components/PropertyMap";
+
+interface MapData {
+  xmin: number;
+  ymin: number;
+  xmax: number;
+  ymax: number;
+  center_x: number;
+  center_y: number;
+  plotNo: string;
+  info: string;
+  plotInfoLinks: string;
+}
 
 const PropertyDetails = () => {
   const { id } = useParams();
   const location = useLocation();
   const [htmlContent, setHtmlContent] = useState("");
   const [loading, setLoading] = useState(true);
+  const [showMap, setShowMap] = useState(false);
+  const [mapData, setMapData] = useState<MapData | null>(null);
+  const [mapLoading, setMapLoading] = useState(false);
+  const [infoCollapsed, setInfoCollapsed] = useState(false);
 
   useEffect(() => {
     const fetchPropertyDetails = async () => {
@@ -40,6 +56,26 @@ const PropertyDetails = () => {
     fetchPropertyDetails();
   }, [location.state]);
 
+  const handleViewOnMap = async () => {
+    if (!location.state) return;
+    
+    setMapLoading(true);
+    setShowMap(true);
+    
+    try {
+      const { district_code, tehsil_code, village_code, khasra_number } = location.state;
+      const response = await fetch(
+        `https://bhunaksha.uk.gov.in/ScalarDatahandler?OP=5&state=05&levels=${district_code}%2C${tehsil_code}%2C${village_code}%2C&plotno=${khasra_number}`
+      );
+      const data = await response.json();
+      setMapData(data);
+    } catch (error) {
+      console.error('Error fetching map data:', error);
+    } finally {
+      setMapLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -56,14 +92,73 @@ const PropertyDetails = () => {
           <h1 className="text-3xl md:text-4xl font-bold mb-6">
             Property Details
           </h1>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-           <Link to="/map">
-                <Button variant="hero" size="lg" className="text-lg px-8 text-black">
-                <MapPin className="w-5 h-5" />
-                View On Map
-              </Button>
-            </Link>
-            </div>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
+            <Button 
+              variant="default" 
+              size="lg" 
+              className="text-lg px-8"
+              onClick={handleViewOnMap}
+              disabled={mapLoading}
+            >
+              <MapPin className="w-5 h-5" />
+              {mapLoading ? 'Loading Map...' : 'View On Map'}
+            </Button>
+          </div>
+          {showMap && mapData && (
+            <Card className="mb-6">
+              <CardContent className="p-0 relative">
+                <div className="h-[600px] w-full">
+                  <PropertyMap
+                    xmin={mapData.xmin}
+                    ymin={mapData.ymin}
+                    xmax={mapData.xmax}
+                    ymax={mapData.ymax}
+                    center_x={mapData.center_x}
+                    center_y={mapData.center_y}
+                    plotNo={mapData.plotNo}
+                  />
+                </div>
+                
+                {/* Info Modal */}
+                <div 
+                  className={`absolute bottom-4 right-4 bg-background border rounded-lg shadow-lg transition-all ${
+                    infoCollapsed ? 'w-12 h-12' : 'w-80 max-h-96'
+                  }`}
+                >
+                  <div 
+                    className="flex items-center justify-between p-3 cursor-pointer border-b"
+                    onClick={() => setInfoCollapsed(!infoCollapsed)}
+                  >
+                    {!infoCollapsed && <span className="font-semibold">Plot Information</span>}
+                    {infoCollapsed ? (
+                      <ChevronUp className="w-5 h-5" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5" />
+                    )}
+                  </div>
+                  {!infoCollapsed && (
+                    <div className="p-4 overflow-auto max-h-80">
+                      <div className="space-y-2 text-sm">
+                        <div><strong>Plot No:</strong> {mapData.plotNo}</div>
+                        <div><strong>GIS Code:</strong> {(mapData as any).gisCode}</div>
+                        <div><strong>Center:</strong> {mapData.center_y.toFixed(6)}, {mapData.center_x.toFixed(6)}</div>
+                        {mapData.info && (
+                          <div><strong>Info:</strong> {mapData.info}</div>
+                        )}
+                        {mapData.plotInfoLinks && (
+                          <div 
+                            className="pt-2 border-t"
+                            dangerouslySetInnerHTML={{ __html: mapData.plotInfoLinks }}
+                          />
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {loading ? (
             <Card>
               <CardContent className="py-12 text-center">
