@@ -11,7 +11,66 @@ serve(async (req) => {
   }
 
   try {
-    const { act, district_code, tehsil_code, kcn, vcc, khata_number, village_code, pargana_code, fasli_code } = await req.json();
+    const url = new URL(req.url);
+    const pathname = url.pathname;
+
+    // GET /scalar?plotno=XXXX[&levels=061,00306,045452,]
+    if (req.method === 'GET' && pathname.endsWith('/scalar')) {
+      const plotno = url.searchParams.get('plotno');
+      const tehsil_code = url.searchParams.get('tehsil_code');
+      const village_code = url.searchParams.get('village_code');
+      const levels = url.searchParams.get('levels') ?? '061,00306,045452,';
+
+      if (!plotno || plotno === 'undefined') {
+        return new Response(JSON.stringify({ error: 'Missing required query param: plotno' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      const target = new URL('https://bhunaksha.uk.gov.in/ScalarDatahandler');
+      target.searchParams.set('OP', '5');
+      target.searchParams.set('state', '05');
+      target.searchParams.set('levels', levels+"%2C"+tehsil_code+"%2C"+village_code);
+      target.searchParams.set('plotno', plotno);
+
+      const resp = await fetch(target.toString(), {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json,text/plain,*/*',
+          // Upstream may inspect Referer; send a plausible value
+          'Referer': 'https://bhunaksha.uk.gov.in/',
+        },
+      });
+
+      const text = await resp.text();
+      return text
+      // Try to pass through JSON if possible; otherwise return text
+      try {
+        const json = JSON.parse(text);
+        return new Response(JSON.stringify(json), {
+          status: resp.status,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      } catch (_) {
+        return new Response(text, {
+          status: resp.status,
+          headers: { ...corsHeaders, 'Content-Type': resp.headers.get('content-type') ?? 'application/json' },
+        });
+      }
+    }
+
+    // For non-GET requests, try to parse JSON body; otherwise use empty object
+    let parsed: any = {};
+    if (req.method !== 'GET') {
+      try {
+        parsed = await req.json();
+      } catch (_) {
+        parsed = {};
+      }
+    }
+
+    const { act, district_code, tehsil_code, kcn, vcc, khata_number, village_code, pargana_code, fasli_code } = parsed;
     
     // Handle property details report request
     if (act === 'getReport') {

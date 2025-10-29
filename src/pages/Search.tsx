@@ -284,7 +284,8 @@ const Search = () => {
                             tehsil_code: selectedTehsil,
                             village_code: selectedVillage,
                             pargana_code: selectedVillageData?.pargana_code_new || '',
-                            fasli_code: '999'
+                            fasli_code: '999',
+                            khasra_number: property.khasra_number
                           }}
                         >
                           <Button variant="outline" size="sm">

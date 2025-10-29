@@ -12,6 +12,7 @@ import PropertyDetails from "./pages/PropertyDetails";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
+import MapViewer from "./pages/MapViewer";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/" element={<Home />} />
             <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
             <Route path="/map" element={<ProtectedRoute><MapView /></ProtectedRoute>} />
+            <Route path="/mapview" element={<MapViewer />} />
             <Route path="/property" element={<ProtectedRoute><PropertyDetails /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>

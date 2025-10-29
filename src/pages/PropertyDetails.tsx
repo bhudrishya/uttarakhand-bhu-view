@@ -64,8 +64,8 @@ const PropertyDetails = () => {
     
     try {
       const { district_code, tehsil_code, village_code, khasra_number } = location.state;
-      const response = await fetch(
-        `https://bhunaksha.uk.gov.in/ScalarDatahandler?OP=5&state=05&levels=${district_code}%2C${tehsil_code}%2C${village_code}%2C&plotno=${khasra_number}`
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/bhulekh-proxy/scalar?OP=5&state=05&levels=${district_code}&tehsil_code=${tehsil_code}&village_code=${village_code}&plotno=${khasra_number}`, 
+        { headers: { "x-client-info": "web" }}
       );
       const data = await response.json();
       setMapData(data);
