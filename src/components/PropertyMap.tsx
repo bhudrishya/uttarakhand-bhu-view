@@ -28,33 +28,29 @@ const PropertyMap = ({ xmin, ymin, xmax, ymax, center_x, center_y, plotNo }: Pro
     [ymax, xmax]
   ];
 
-  const MapContainerComponent = MapContainer as any;
-  const TileLayerComponent = TileLayer as any;
-  const RectangleComponent = Rectangle as any;
-  const MarkerComponent = Marker as any;
-  const PopupComponent = Popup as any;
-
   return (
-    <MapContainerComponent
+    <MapContainer
       center={center}
       zoom={18}
       style={{ height: '100%', width: '100%' }}
       scrollWheelZoom={true}
+      {...({} as any)}
     >
-      <TileLayerComponent
+      <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        {...({} as any)}
       />
-      <RectangleComponent
+      <Rectangle
         bounds={bounds}
         pathOptions={{ color: 'red', fillColor: 'red', fillOpacity: 0.2 }}
+        {...({} as any)}
       />
-      <MarkerComponent position={center}>
-        <PopupComponent>
+      <Marker position={center} {...({} as any)}>
+        <Popup {...({} as any)}>
           Plot No: {plotNo}
-        </PopupComponent>
-      </MarkerComponent>
-    </MapContainerComponent>
+        </Popup>
+      </Marker>
+    </MapContainer>
   );
 };
 
