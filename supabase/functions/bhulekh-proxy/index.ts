@@ -44,7 +44,6 @@ serve(async (req) => {
       });
 
       const text = await resp.text();
-      return text
       // Try to pass through JSON if possible; otherwise return text
       try {
         const json = JSON.parse(text);
