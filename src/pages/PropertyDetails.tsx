@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, MapPin, ChevronDown, ChevronUp } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import PropertyMap from "@/components/PropertyMap";
+import proj4 from "proj4";
 
 interface MapData {
   xmin: number;
@@ -79,6 +80,14 @@ const PropertyDetails = () => {
       }
       
       const data = await response.json();
+    
+
+      const toLatLon = (x: number, y: number) =>
+      proj4("EPSG:3857", "EPSG:4326", [x * 66411.22723828269, y * 405870.1235128565]);
+
+      const [lon, lat] = toLatLon(data.center_x, data.center_y);
+      data.center_x=lon
+      data.center_y=lat
       setMapData(data);
     } catch (error) {
       console.error('Error fetching map data:', error);
@@ -125,7 +134,7 @@ const PropertyDetails = () => {
                     xmax={mapData.xmax}
                     ymax={mapData.ymax}
                     center_x={mapData.center_x}
-                    center_y={mapData.center_y}
+                    center_y={mapData.center_y }
                     plotNo={mapData.plotNo}
                   />
                 </div>
