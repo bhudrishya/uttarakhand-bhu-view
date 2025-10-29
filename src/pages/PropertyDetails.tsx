@@ -115,7 +115,7 @@ const PropertyDetails = () => {
               {mapLoading ? 'Loading Map...' : 'View On Map'}
             </Button>
           </div>
-          {showMap && mapData && (
+          {showMap && mapData && mapData.center_x && mapData.center_y && (
             <Card className="mb-6">
               <CardContent className="p-0 relative">
                 <div className="h-[600px] w-full">
@@ -152,7 +152,9 @@ const PropertyDetails = () => {
                       <div className="space-y-2 text-sm">
                         <div><strong>Plot No:</strong> {mapData.plotNo}</div>
                         <div><strong>GIS Code:</strong> {(mapData as any).gisCode}</div>
-                        <div><strong>Center:</strong> {mapData.center_y.toFixed(6)}, {mapData.center_x.toFixed(6)}</div>
+                        {mapData.center_y && mapData.center_x && (
+                          <div><strong>Center:</strong> {mapData.center_y.toFixed(6)}, {mapData.center_x.toFixed(6)}</div>
+                        )}
                         {mapData.info && (
                           <div><strong>Info:</strong> {mapData.info}</div>
                         )}
