@@ -1,5 +1,4 @@
-import { MapContainer, TileLayer, Rectangle, Marker, Popup } from 'react-leaflet';
-import type { LatLngExpression, LatLngBoundsExpression } from 'leaflet';
+import { useEffect, useRef } from 'react';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -22,36 +21,47 @@ interface PropertyMapProps {
 }
 
 const PropertyMap = ({ xmin, ymin, xmax, ymax, center_x, center_y, plotNo }: PropertyMapProps) => {
-  const center: LatLngExpression = [center_y, center_x];
-  const bounds: LatLngBoundsExpression = [
-    [ymin, xmin],
-    [ymax, xmax]
-  ];
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
 
-  return (
-    <MapContainer
-      center={center}
-      zoom={18}
-      style={{ height: '100%', width: '100%' }}
-      scrollWheelZoom={true}
-      {...({} as any)}
-    >
-      <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        {...({} as any)}
-      />
-      <Rectangle
-        bounds={bounds}
-        pathOptions={{ color: 'red', fillColor: 'red', fillOpacity: 0.2 }}
-        {...({} as any)}
-      />
-      <Marker position={center} {...({} as any)}>
-        <Popup {...({} as any)}>
-          Plot No: {plotNo}
-        </Popup>
-      </Marker>
-    </MapContainer>
-  );
+  useEffect(() => {
+    if (!mapRef.current || mapInstanceRef.current) return;
+
+    // Initialize the map
+    const map = L.map(mapRef.current).setView([center_y, center_x], 18);
+
+    // Add tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    // Add rectangle for property bounds
+    const bounds: L.LatLngBoundsExpression = [
+      [ymin, xmin],
+      [ymax, xmax]
+    ];
+    L.rectangle(bounds, {
+      color: 'red',
+      fillColor: 'red',
+      fillOpacity: 0.2
+    }).addTo(map);
+
+    // Add marker at center
+    const marker = L.marker([center_y, center_x]).addTo(map);
+    marker.bindPopup(`Plot No: ${plotNo}`);
+
+    mapInstanceRef.current = map;
+
+    // Cleanup
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, [xmin, ymin, xmax, ymax, center_x, center_y, plotNo]);
+
+  return <div ref={mapRef} style={{ height: '100%', width: '100%' }} />;
 };
 
 export default PropertyMap;
