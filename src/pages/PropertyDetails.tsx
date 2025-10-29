@@ -86,8 +86,14 @@ const PropertyDetails = () => {
       proj4("EPSG:3857", "EPSG:4326", [x * 66411.22723828269, y * 405870.1235128565]);
 
       const [lon, lat] = toLatLon(data.center_x, data.center_y);
-      data.center_x=lon
-      data.center_y=lat
+      data.center_x=lon;
+      data.center_y=lat;
+      const [lonmax, latmax] = toLatLon(data.xmax, data.ymax);
+      data.xmax=lonmax; 
+      data.ymax=latmax;
+      const [lonmin, latmin] = toLatLon(data.xmin, data.ymin);
+      data.xmin=lonmin; 
+      data.ymin=latmin;
       setMapData(data);
     } catch (error) {
       console.error('Error fetching map data:', error);
