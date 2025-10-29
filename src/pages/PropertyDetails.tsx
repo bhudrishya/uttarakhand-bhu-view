@@ -64,9 +64,20 @@ const PropertyDetails = () => {
     
     try {
       const { district_code, tehsil_code, village_code, khasra_number } = location.state;
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/bhulekh-proxy/scalar?OP=5&state=05&levels=${district_code}&tehsil_code=${tehsil_code}&village_code=${village_code}&plotno=${khasra_number}`, 
-        { headers: { "x-client-info": "web" }}
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/bhulekh-proxy/scalar?plotno=${khasra_number}&levels=${district_code}&tehsil_code=${tehsil_code}&village_code=${village_code}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        }
       );
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
       setMapData(data);
     } catch (error) {

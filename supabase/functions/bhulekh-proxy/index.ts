@@ -19,7 +19,7 @@ serve(async (req) => {
       const plotno = url.searchParams.get('plotno');
       const tehsil_code = url.searchParams.get('tehsil_code');
       const village_code = url.searchParams.get('village_code');
-      const levels = url.searchParams.get('levels') ?? '061,00306,045452,';
+      const levels = url.searchParams.get('levels') ?? '061';
 
       if (!plotno || plotno === 'undefined') {
         return new Response(JSON.stringify({ error: 'Missing required query param: plotno' }), {
@@ -28,33 +28,42 @@ serve(async (req) => {
         });
       }
 
+      // Construct the levels parameter properly
+      const fullLevels = `${levels},${tehsil_code || '00306'},${village_code || '045452'}`;
+      
       const target = new URL('https://bhunaksha.uk.gov.in/ScalarDatahandler');
       target.searchParams.set('OP', '5');
       target.searchParams.set('state', '05');
-      target.searchParams.set('levels', `${levels}%2C${tehsil_code}%2C${village_code}`);
+      target.searchParams.set('levels', fullLevels);
       target.searchParams.set('plotno', plotno);
+
+      console.log('Fetching from:', target.toString());
 
       const resp = await fetch(target.toString(), {
         method: 'GET',
         headers: {
           'Accept': 'application/json,text/plain,*/*',
-          // Upstream may inspect Referer; send a plausible value
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
           'Referer': 'https://bhunaksha.uk.gov.in/',
         },
       });
 
+      console.log('Response status:', resp.status);
+
       const text = await resp.text();
+      console.log('Response text:', text.substring(0, 200));
+      
       // Try to pass through JSON if possible; otherwise return text
       try {
         const json = JSON.parse(text);
         return new Response(JSON.stringify(json), {
-          status: resp.status,
+          status: 200,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       } catch (_) {
-        return new Response(text, {
-          status: resp.status,
-          headers: { ...corsHeaders, 'Content-Type': resp.headers.get('content-type') ?? 'application/json' },
+        return new Response(JSON.stringify({ error: 'Invalid response from upstream', raw: text }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
     }
