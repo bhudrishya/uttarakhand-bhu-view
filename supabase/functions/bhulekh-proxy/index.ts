@@ -31,7 +31,7 @@ serve(async (req) => {
       const target = new URL('https://bhunaksha.uk.gov.in/ScalarDatahandler');
       target.searchParams.set('OP', '5');
       target.searchParams.set('state', '05');
-      target.searchParams.set('levels', levels+"%2C"+tehsil_code+"%2C"+village_code);
+      target.searchParams.set('levels', `${levels}%2C${tehsil_code}%2C${village_code}`);
       target.searchParams.set('plotno', plotno);
 
       const resp = await fetch(target.toString(), {
