@@ -9,6 +9,7 @@ import Home from "./pages/Home";
 import Search from "./pages/Search";
 import MapView from "./pages/MapView";
 import PropertyDetails from "./pages/PropertyDetails";
+import PropertyMapView from "./pages/PropertyMapView";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
             <Route path="/map" element={<ProtectedRoute><MapView /></ProtectedRoute>} />
             <Route path="/property" element={<ProtectedRoute><PropertyDetails /></ProtectedRoute>} />
+            <Route path="/property/map" element={<ProtectedRoute><PropertyMapView /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

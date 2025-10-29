@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
-import { useParams, useLocation, Link } from "react-router-dom";
+import { useParams, useLocation, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, MapPin, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, MapPin } from "lucide-react";
 import Navbar from "@/components/Navbar";
-import PropertyMap from "@/components/PropertyMap";
 import proj4 from "proj4";
 
 interface MapData {
@@ -22,12 +21,10 @@ interface MapData {
 const PropertyDetails = () => {
   const { id } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
   const [htmlContent, setHtmlContent] = useState("");
   const [loading, setLoading] = useState(true);
-  const [showMap, setShowMap] = useState(false);
-  const [mapData, setMapData] = useState<MapData | null>(null);
   const [mapLoading, setMapLoading] = useState(false);
-  const [infoCollapsed, setInfoCollapsed] = useState(false);
 
   useEffect(() => {
     const fetchPropertyDetails = async () => {
@@ -61,7 +58,6 @@ const PropertyDetails = () => {
     if (!location.state) return;
     
     setMapLoading(true);
-    setShowMap(true);
     
     try {
       const { district_code, tehsil_code, village_code, khasra_number } = location.state;
@@ -80,7 +76,6 @@ const PropertyDetails = () => {
       }
       
       const data = await response.json();
-    
 
       const toLatLon = (x: number, y: number) =>
       proj4("EPSG:3857", "EPSG:4326", [x * 66411.22723828269, y * 405870.1235128565]);
@@ -94,7 +89,14 @@ const PropertyDetails = () => {
       const [lonmin, latmin] = toLatLon(data.xmin, data.ymin);
       data.xmin=lonmin; 
       data.ymin=latmin;
-      setMapData(data);
+      
+      // Navigate to map view page with map data
+      navigate('/property/map', { 
+        state: { 
+          ...data,
+          propertyState: location.state 
+        } 
+      });
     } catch (error) {
       console.error('Error fetching map data:', error);
     } finally {
@@ -130,62 +132,6 @@ const PropertyDetails = () => {
               {mapLoading ? 'Loading Map...' : 'View On Map'}
             </Button>
           </div>
-          {showMap && mapData && mapData.center_x && mapData.center_y && (
-            <Card className="mb-6">
-              <CardContent className="p-0 relative">
-                <div className="h-[600px] w-full">
-                  <PropertyMap
-                    xmin={mapData.xmin}
-                    ymin={mapData.ymin}
-                    xmax={mapData.xmax}
-                    ymax={mapData.ymax}
-                    center_x={mapData.center_x}
-                    center_y={mapData.center_y }
-                    plotNo={mapData.plotNo}
-                  />
-                </div>
-                
-                {/* Info Modal */}
-                <div 
-                  className={`absolute bottom-4 right-4 bg-background border rounded-lg shadow-lg transition-all ${
-                    infoCollapsed ? 'w-12 h-12' : 'w-80 max-h-96'
-                  }`}
-                >
-                  <div 
-                    className="flex items-center justify-between p-3 cursor-pointer border-b"
-                    onClick={() => setInfoCollapsed(!infoCollapsed)}
-                  >
-                    {!infoCollapsed && <span className="font-semibold">Plot Information</span>}
-                    {infoCollapsed ? (
-                      <ChevronUp className="w-5 h-5" />
-                    ) : (
-                      <ChevronDown className="w-5 h-5" />
-                    )}
-                  </div>
-                  {!infoCollapsed && (
-                    <div className="p-4 overflow-auto max-h-80">
-                      <div className="space-y-2 text-sm">
-                        <div><strong>Plot No:</strong> {mapData.plotNo}</div>
-                        <div><strong>GIS Code:</strong> {(mapData as any).gisCode}</div>
-                        {mapData.center_y && mapData.center_x && (
-                          <div><strong>Center:</strong> {mapData.center_y.toFixed(6)}, {mapData.center_x.toFixed(6)}</div>
-                        )}
-                        {mapData.info && (
-                          <div><strong>Info:</strong> {mapData.info}</div>
-                        )}
-                        {mapData.plotInfoLinks && (
-                          <div 
-                            className="pt-2 border-t"
-                            dangerouslySetInnerHTML={{ __html: mapData.plotInfoLinks }}
-                          />
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
 
           {loading ? (
             <Card>
