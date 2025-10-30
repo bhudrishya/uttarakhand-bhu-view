@@ -129,15 +129,15 @@ const Home = () => {
               © 2025 Uttarakhand BhuDrishya. All rights reserved.
             </p>
             <div className="flex gap-6">
-              <a href="#" className="text-sm text-muted-foreground hover:text-primary">
+              <Link to="/privacy-policy" className="text-sm text-muted-foreground hover:text-primary">
                 Privacy Policy
-              </a>
-              <a href="#" className="text-sm text-muted-foreground hover:text-primary">
+              </Link>
+              <Link to="/terms" className="text-sm text-muted-foreground hover:text-primary">
                 Terms of Service
-              </a>
-              <a href="#" className="text-sm text-muted-foreground hover:text-primary">
+              </Link>
+              <Link to="/contact" className="text-sm text-muted-foreground hover:text-primary">
                 Contact
-              </a>
+              </Link>
             </div>
           </div>
         </div>
