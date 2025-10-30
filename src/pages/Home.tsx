@@ -30,17 +30,11 @@ const Home = () => {
             <p className="text-lg text-white/80 mb-10">
               Access property details, verify ownership, and explore GIS-based land records with complete transparency and accuracy.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex justify-center">
               <Link to="/search">
                 <Button variant="hero" size="lg" className="text-lg px-8">
                   <Search className="w-5 h-5" />
                   Search Property
-                </Button>
-              </Link>
-              <Link to="/map">
-                <Button variant="hero" size="lg" className="text-lg px-8">
-                  <MapPin className="w-5 h-5" />
-                  View Map
                 </Button>
               </Link>
             </div>

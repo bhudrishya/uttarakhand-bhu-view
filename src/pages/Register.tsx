@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MapPin } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,6 +15,9 @@ const registerSchema = z.object({
   email: z.string().trim().email("Invalid email address").max(255),
   phoneNumber: z.string().trim().min(10, "Phone number must be at least 10 digits").max(15),
   address: z.string().trim().min(5, "Address must be at least 5 characters").max(500),
+  userType: z.enum(["buyer", "seller", "government_official", "other"], {
+    required_error: "Please select a user type",
+  }),
   password: z.string().min(6, "Password must be at least 6 characters").max(100),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -26,6 +30,7 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [address, setAddress] = useState("");
+  const [userType, setUserType] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -43,6 +48,7 @@ const Register = () => {
         email,
         phoneNumber,
         address,
+        userType,
         password,
         confirmPassword,
       });
@@ -68,6 +74,7 @@ const Register = () => {
             email: validatedData.email,
             phone_number: validatedData.phoneNumber,
             address: validatedData.address,
+            user_type: validatedData.userType,
           });
 
         if (profileError) throw profileError;
@@ -171,6 +178,21 @@ const Register = () => {
                   onChange={(e) => setAddress(e.target.value)}
                   required
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="userType">User Type</Label>
+                <Select value={userType} onValueChange={setUserType} required>
+                  <SelectTrigger id="userType">
+                    <SelectValue placeholder="Select user type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="buyer">Buyer</SelectItem>
+                    <SelectItem value="seller">Seller</SelectItem>
+                    <SelectItem value="government_official">Government Official</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">

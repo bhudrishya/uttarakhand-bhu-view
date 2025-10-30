@@ -24,6 +24,7 @@ export type Database = {
           phone_number: string
           updated_at: string
           user_id: string
+          user_type: string
         }
         Insert: {
           address: string
@@ -34,6 +35,7 @@ export type Database = {
           phone_number: string
           updated_at?: string
           user_id: string
+          user_type?: string
         }
         Update: {
           address?: string
@@ -44,6 +46,7 @@ export type Database = {
           phone_number?: string
           updated_at?: string
           user_id?: string
+          user_type?: string
         }
         Relationships: []
       }

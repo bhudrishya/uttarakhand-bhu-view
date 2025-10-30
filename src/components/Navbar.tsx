@@ -41,20 +41,14 @@ const Navbar = () => {
             >
               Search Property
             </Link>
-            <Link 
-              to="/map" 
-              className={`text-sm font-medium transition-colors hover:text-primary ${
-                isActive("/map") ? "text-primary" : "text-muted-foreground"
-              }`}
-            >
-              Map View
-            </Link>
             {user ? (
               <>
-                <Button variant="ghost" size="sm" className="gap-2">
-                  <User className="w-4 h-4" />
-                  Profile
-                </Button>
+                <Link to="/profile">
+                  <Button variant="ghost" size="sm" className="gap-2">
+                    <User className="w-4 h-4" />
+                    Profile
+                  </Button>
+                </Link>
                 <Button variant="outline" size="sm" onClick={signOut} className="gap-2">
                   <LogOut className="w-4 h-4" />
                   Logout
@@ -95,21 +89,14 @@ const Navbar = () => {
             >
               Search Property
             </Link>
-            <Link 
-              to="/map" 
-              className={`block text-sm font-medium ${
-                isActive("/map") ? "text-primary" : "text-muted-foreground"
-              }`}
-              onClick={() => setIsOpen(false)}
-            >
-              Map View
-            </Link>
             {user ? (
               <div className="space-y-2">
-                <Button variant="ghost" size="sm" className="w-full gap-2" onClick={() => setIsOpen(false)}>
-                  <User className="w-4 h-4" />
-                  Profile
-                </Button>
+                <Link to="/profile">
+                  <Button variant="ghost" size="sm" className="w-full gap-2" onClick={() => setIsOpen(false)}>
+                    <User className="w-4 h-4" />
+                    Profile
+                  </Button>
+                </Link>
                 <Button variant="outline" size="sm" className="w-full gap-2" onClick={() => { signOut(); setIsOpen(false); }}>
                   <LogOut className="w-4 h-4" />
                   Logout
