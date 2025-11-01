@@ -83,18 +83,52 @@ serve(async (req) => {
       });
     }
 
-    // --- Handle POST for getReport ---
+    // --- Handle POST for various actions ---
     if (req.method === "POST") {
       const parsed = await req.json().catch(() => ({}));
-      const { act, district_code, tehsil_code, khata_number, village_code, pargana_code, fasli_code } = parsed;
+      const { act, district_code, tehsil_code, khata_number, village_code, pargana_code, fasli_code, kcn, vcc } = parsed;
 
+      // Handle fillDistrict, fillTehsil, fillVillage, sbksn actions
+      if (act === "fillDistrict" || act === "fillTehsil" || act === "fillVillage" || act === "sbksn") {
+        let bodyParams = `act=${act}`;
+        
+        if (act === "fillTehsil" && district_code) {
+          bodyParams += `&district_code=${district_code}`;
+        } else if (act === "fillVillage" && district_code && tehsil_code) {
+          bodyParams += `&district_code=${district_code}&tehsil_code=${tehsil_code}`;
+        } else if (act === "sbksn" && kcn && vcc) {
+          bodyParams += `&kcn=${kcn}&vcc=${vcc}`;
+        }
+
+        const response = await fetch("https://bhulekh.uk.gov.in/public/public_ror/action/public_action.jsp", {
+          method: "POST",
+          headers: {
+            "Accept": "*/*",
+            "Accept-Language": "en-GB,en;q=0.7",
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            "Origin": "https://bhulekh.uk.gov.in",
+            "Referer": "https://bhulekh.uk.gov.in/public/public_ror/Public_ROR.jsp",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+            "X-Requested-With": "XMLHttpRequest",
+          },
+          body: bodyParams,
+        });
+
+        const data = await response.json();
+        return new Response(JSON.stringify(data), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Handle getReport action
       if (act === "getReport") {
         const reportBody = `khata_number=${khata_number}&district_code=${district_code}&tehsil_code=${tehsil_code}&village_code=${village_code}&pargana_code=${pargana_code}&fasli_code=${fasli_code}`;
         const response = await fetch("https://bhulekh.uk.gov.in/public/public_ror/public_ror_report.jsp", {
           method: "POST",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
-            Referer: "https://bhulekh.uk.gov.in/public/public_ror/Public_ROR.jsp",
+            "Referer": "https://bhulekh.uk.gov.in/public/public_ror/Public_ROR.jsp",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
           },
           body: reportBody,
         });
