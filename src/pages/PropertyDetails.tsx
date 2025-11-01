@@ -25,12 +25,8 @@ const PropertyDetails = () => {
   const [loading, setLoading] = useState(true);
   const [mapLoading, setMapLoading] = useState(false);
 
-  // Fixed reference (origin point) — base latitude and longitude
-  const originLat = 30.201218837594354;
-  const originLng = 78.81496301182275;
-
   // --- Function to convert meter offsets to lat/lon ---
-  const metersToLatLng = (dx: number, dy: number) => {
+  const metersToLatLng = (dx: number, dy: number, originLat: number, originLng: number) => {
     const lat = originLat + (dy*2) / 111320; // 1° lat ≈ 111.32 km
     const lng =
       originLng + (dx*2) / (111320 * Math.cos((originLat * Math.PI) / 180));
@@ -81,12 +77,16 @@ const PropertyDetails = () => {
 
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-      const data: MapData = await response.json();
+      const data: MapData & { static_lat?: number; static_lon?: number } = await response.json();
 
-      // Convert all offsets to true lat/lon relative to fixed origin
-      const center = metersToLatLng(data.center_x, data.center_y);
-      const sw = metersToLatLng(data.xmin, data.ymin);
-      const ne = metersToLatLng(data.xmax, data.ymax);
+      // Use static lat/lon from API response or fallback
+      const originLat = data.static_lat || 30.325564;
+      const originLng = data.static_lon || 78.043681;
+
+      // Convert all offsets to true lat/lon relative to dynamic origin
+      const center = metersToLatLng(data.center_x, data.center_y, originLat, originLng);
+      const sw = metersToLatLng(data.xmin, data.ymin, originLat, originLng);
+      const ne = metersToLatLng(data.xmax, data.ymax, originLat, originLng);
 
       const mapData = {
         ...data,
