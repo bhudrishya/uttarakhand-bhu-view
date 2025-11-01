@@ -86,7 +86,7 @@ serve(async (req) => {
     // --- Handle POST for various actions ---
     if (req.method === "POST") {
       const parsed = await req.json().catch(() => ({}));
-      const { act, district_code, tehsil_code, khata_number, village_code, pargana_code, fasli_code, kcn, vcc } = parsed;
+      const { act, district_code, tehsil_code, khata_number, village_code, pargana_code, fasli_code, kcn, vcc, fasli_code_value, fasli_name_value } = parsed;
 
       // Handle fillDistrict, fillTehsil, fillVillage, sbksn actions
       if (act === "fillDistrict" || act === "fillTehsil" || act === "fillVillage" || act === "sbksn") {
@@ -98,6 +98,12 @@ serve(async (req) => {
           bodyParams += `&district_code=${district_code}&tehsil_code=${tehsil_code}`;
         } else if (act === "sbksn" && kcn && vcc) {
           bodyParams += `&kcn=${kcn}&vcc=${vcc}`;
+          if (fasli_code_value) {
+            bodyParams += `&fasli-code-value=${fasli_code_value}`;
+          }
+          if (fasli_name_value) {
+            bodyParams += `&fasli-name-value=${encodeURIComponent(fasli_name_value)}`;
+          }
         }
 
         const response = await fetch("https://bhulekh.uk.gov.in/public/public_ror/action/public_action.jsp", {
@@ -114,10 +120,20 @@ serve(async (req) => {
           body: bodyParams,
         });
 
-        const data = await response.json();
-        return new Response(JSON.stringify(data), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        const text = await response.text();
+        
+        // Try to parse as JSON, if it fails, return the raw text
+        try {
+          const data = JSON.parse(text);
+          return new Response(JSON.stringify(data), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        } catch {
+          return new Response(JSON.stringify({ error: "Invalid response from API", raw: text }), {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
       }
 
       // Handle getReport action
