@@ -32,7 +32,6 @@ type Village = {
 type PropertyResult = {
   khata_number: string;
   khasra_number: string;
-  unique_gata_id: string;
 };
 
 const Search = () => {
@@ -299,10 +298,6 @@ const Search = () => {
                         <div className="text-sm">
                           <span className="text-muted-foreground">Khata Number:</span>{" "}
                           <span className="font-medium">{property.khata_number}</span>
-                        </div>
-                        <div className="text-sm">
-                          <span className="text-muted-foreground">Unique Gata ID:</span>{" "}
-                          <span className="font-medium">{property.unique_gata_id}</span>
                         </div>
                       </div>
                     </CardContent>
