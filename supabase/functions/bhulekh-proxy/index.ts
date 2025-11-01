@@ -129,6 +129,15 @@ serve(async (req) => {
     });
 
     const data = await response.json();
+    if(act === 'fillDistrict'){
+      data.sort((a, b) =>
+        a.district_name_english.localeCompare(b.district_name_english, 'en', { sensitivity: 'base' })
+      );
+    
+      return new Response(JSON.stringify(data), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
     if(act === 'fillTehsil'){
       data.sort((a, b) =>
         a.tehsil_name_english.localeCompare(b.tehsil_name_english, 'en', { sensitivity: 'base' })
