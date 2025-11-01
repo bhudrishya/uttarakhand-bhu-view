@@ -80,7 +80,7 @@ const Search = () => {
         body: JSON.stringify({ act: 'fillDistrict' })
       });
       const data = await response.json();
-      setDistricts(data);
+      setDistricts(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching districts:', error);
     } finally {
@@ -99,7 +99,7 @@ const Search = () => {
         body: JSON.stringify({ act: 'fillTehsil', district_code: districtCode })
       });
       const data = await response.json();
-      setTehsils(data);
+      setTehsils(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching tehsils:', error);
     } finally {
@@ -122,7 +122,7 @@ const Search = () => {
         })
       });
       const data = await response.json();
-      setVillages(data);
+      setVillages(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching villages:', error);
     } finally {
@@ -153,7 +153,7 @@ const Search = () => {
       });
       const data = await response.json();
       console.log('Search response:', data);
-      setResults(data || []);
+      setResults(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error searching:', error);
       setResults([]);
