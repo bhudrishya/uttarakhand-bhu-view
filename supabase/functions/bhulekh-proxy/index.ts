@@ -130,7 +130,7 @@ serve(async (req) => {
 
     const data = await response.json();
     if(act === 'fillDistrict'){
-      data.sort((a, b) =>
+      data.sort((a: any, b: any) =>
         a.district_name_english.localeCompare(b.district_name_english, 'en', { sensitivity: 'base' })
       );
     
@@ -139,7 +139,7 @@ serve(async (req) => {
       });
     }
     if(act === 'fillTehsil'){
-      data.sort((a, b) =>
+      data.sort((a: any, b: any) =>
         a.tehsil_name_english.localeCompare(b.tehsil_name_english, 'en', { sensitivity: 'base' })
       );
     
@@ -148,7 +148,7 @@ serve(async (req) => {
       });
     }
     if(act === 'fillVillage'){
-      data.sort((a, b) =>
+      data.sort((a: any, b: any) =>
         a.tehsil_name_english.localeCompare(b.vname_eng, 'en', { sensitivity: 'base' })
       );
     
