@@ -1,12 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
+  if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
@@ -14,157 +14,124 @@ serve(async (req) => {
     const url = new URL(req.url);
     const pathname = url.pathname;
 
-    // --- 🔹 Add Static Lat/Lon Map ---
-    const staticLocations: Record<string, { lat: number; lon: number }> = {
-      // key = `${tehsil_code}-${village_code}`
-      "00306-045452": { lat: 30.201218837594354, lon: 78.81496301182275 }, // Example (Rishikesh)
-      "00307-045453": { lat: 30.325, lon: 78.045 }, // Example (Dehradun)
-      "00201-032120": { lat: 29.946, lon: 78.160 }, // Example (Haridwar)
-      // ➕ Add more mappings as needed
-    };
+    // GET /scalar?plotno=XXXX[&levels=061,00306,045452,]
+    if (req.method === 'GET' && pathname.endsWith('/scalar')) {
+      const plotno = url.searchParams.get('plotno');
+      const tehsil_code = url.searchParams.get('tehsil_code');
+      const village_code = url.searchParams.get('village_code');
+      const levels = url.searchParams.get('levels') ?? '061';
 
-    // --- /scalar route ---
-    if (req.method === "GET" && pathname.endsWith("/scalar")) {
-      const plotno = url.searchParams.get("plotno");
-      const tehsil_code = url.searchParams.get("tehsil_code") || "00306";
-      const village_code = url.searchParams.get("village_code") || "045452";
-      const levels = url.searchParams.get("levels") ?? "061";
-
-      if (!plotno) {
-        return new Response(JSON.stringify({ error: "Missing required query param: plotno" }), {
+      if (!plotno || plotno === 'undefined') {
+        return new Response(JSON.stringify({ error: 'Missing required query param: plotno' }), {
           status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
 
-      // Build the upstream Bhunaksha URL
-      const fullLevels = `${levels},${tehsil_code},${village_code}`;
-      const target = new URL("https://bhunaksha.uk.gov.in/ScalarDatahandler");
-      target.searchParams.set("OP", "5");
-      target.searchParams.set("state", "05");
-      target.searchParams.set("levels", fullLevels);
-      target.searchParams.set("plotno", plotno);
+      // Construct the levels parameter properly
+      const fullLevels = `${levels},${tehsil_code || '00306'},${village_code || '045452'}`;
+      
+      const target = new URL('https://bhunaksha.uk.gov.in/ScalarDatahandler');
+      target.searchParams.set('OP', '5');
+      target.searchParams.set('state', '05');
+      target.searchParams.set('levels', fullLevels);
+      target.searchParams.set('plotno', plotno);
+
+      console.log('Fetching from:', target.toString());
 
       const resp = await fetch(target.toString(), {
-        method: "GET",
+        method: 'GET',
         headers: {
-          Accept: "application/json,text/plain,*/*",
-          "User-Agent": "Mozilla/5.0",
-          Referer: "https://bhunaksha.uk.gov.in/",
+          'Accept': 'application/json,text/plain,*/*',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'Referer': 'https://bhunaksha.uk.gov.in/',
         },
       });
 
+      console.log('Response status:', resp.status);
+
       const text = await resp.text();
-
-      let json: any;
+      console.log('Response text:', text.substring(0, 200));
+      
+      // Try to pass through JSON if possible; otherwise return text
       try {
-        json = JSON.parse(text);
-      } catch {
-        return new Response(
-          JSON.stringify({ error: "Invalid response from Bhunaksha", raw: text }),
-          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        const json = JSON.parse(text);
+        return new Response(JSON.stringify(json), {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      } catch (_) {
+        return new Response(JSON.stringify({ error: 'Invalid response from upstream', raw: text }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
       }
+    }
 
-      // 🔹 Inject static lat/lon based on tehsil + village
-      const key = `${tehsil_code}-${village_code}`;
-      if (staticLocations[key]) {
-        json.static_lat = staticLocations[key].lat;
-        json.static_lon = staticLocations[key].lon;
-      } else {
-        // Default fallback (Dehradun center)
-        json.static_lat = 30.325564;
-        json.static_lon = 78.043681;
+    // For non-GET requests, try to parse JSON body; otherwise use empty object
+    let parsed: any = {};
+    if (req.method !== 'GET') {
+      try {
+        parsed = await req.json();
+      } catch (_) {
+        parsed = {};
       }
+    }
 
-      return new Response(JSON.stringify(json), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    const { act, district_code, tehsil_code, kcn, vcc, khata_number, village_code, pargana_code, fasli_code } = parsed;
+    
+    // Handle property details report request
+    if (act === 'getReport') {
+      const reportBody = `khata_number=${khata_number}&district_code=${district_code}&tehsil_code=${tehsil_code}&village_code=${village_code}&pargana_code=${pargana_code}&fasli_code=${fasli_code}`;
+      
+      const response = await fetch('https://bhulekh.uk.gov.in/public/public_ror/public_ror_report.jsp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Referer': 'https://bhulekh.uk.gov.in/public/public_ror/Public_ROR.jsp'
+        },
+        body: reportBody
+      });
+
+      const html = await response.text();
+
+      return new Response(JSON.stringify({ html }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-
-    // --- Handle POST for various actions ---
-    if (req.method === "POST") {
-      const parsed = await req.json().catch(() => ({}));
-      const { act, district_code, tehsil_code, khata_number, village_code, pargana_code, fasli_code, kcn, vcc, fasli_code_value, fasli_name_value } = parsed;
-
-      // Handle fillDistrict, fillTehsil, fillVillage, sbksn actions
-      if (act === "fillDistrict" || act === "fillTehsil" || act === "fillVillage" || act === "sbksn") {
-        let bodyParams = `act=${act}`;
-        
-        if (act === "fillTehsil" && district_code) {
-          bodyParams += `&district_code=${district_code}`;
-        } else if (act === "fillVillage" && district_code && tehsil_code) {
-          bodyParams += `&district_code=${district_code}&tehsil_code=${tehsil_code}`;
-        } else if (act === "sbksn" && kcn && vcc) {
-          bodyParams += `&kcn=${kcn}&vcc=${vcc}`;
-          if (fasli_code_value) {
-            bodyParams += `&fasli-code-value=${fasli_code_value}`;
-          }
-          if (fasli_name_value) {
-            bodyParams += `&fasli-name-value=${encodeURIComponent(fasli_name_value)}`;
-          }
-        }
-
-        const response = await fetch("https://bhulekh.uk.gov.in/public/public_ror/action/public_action.jsp", {
-          method: "POST",
-          headers: {
-            "Accept": "*/*",
-            "Accept-Language": "en-GB,en;q=0.7",
-            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-            "Origin": "https://bhulekh.uk.gov.in",
-            "Referer": "https://bhulekh.uk.gov.in/public/public_ror/Public_ROR.jsp",
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
-            "X-Requested-With": "XMLHttpRequest",
-          },
-          body: bodyParams,
-        });
-
-        const text = await response.text();
-        
-        // Try to parse as JSON, if it fails, return the raw text
-        try {
-          const data = JSON.parse(text);
-          return new Response(JSON.stringify(data), {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        } catch {
-          return new Response(JSON.stringify({ error: "Invalid response from API", raw: text }), {
-            status: 500,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
-      }
-
-      // Handle getReport action
-      if (act === "getReport") {
-        const reportBody = `khata_number=${khata_number}&district_code=${district_code}&tehsil_code=${tehsil_code}&village_code=${village_code}&pargana_code=${pargana_code}&fasli_code=${fasli_code}`;
-        const response = await fetch("https://bhulekh.uk.gov.in/public/public_ror/public_ror_report.jsp", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "Referer": "https://bhulekh.uk.gov.in/public/public_ror/Public_ROR.jsp",
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
-          },
-          body: reportBody,
-        });
-        const html = await response.text();
-        return new Response(JSON.stringify({ html }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+    
+    // Handle other API requests
+    let body = `act=${act}`;
+    if (district_code) body += `&district_code=${district_code}`;
+    if (tehsil_code) body += `&tehsil_code=${tehsil_code}`;
+    if (kcn) body += `&kcn=${kcn}`;
+    if (vcc) body += `&vcc=${vcc}`;
+    
+    // Add fasli parameters for khasra search
+    if (act === 'sbksn') {
+      body += '&fasli-code-value=999&fasli-name-value=%E0%A4%B5%E0%A4%B0%E0%A5%8D%E0%A4%A4%E0%A4%AE%E0%A4%BE%E0%A4%A8+%E0%A4%AB%E0%A4%B8%E0%A4%B2%E0%A5%80';
     }
 
-    // Default
-    return new Response(JSON.stringify({ message: "OK" }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    const response = await fetch('https://bhulekh.uk.gov.in/public/public_ror/action/public_action.jsp', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Referer': 'https://bhulekh.uk.gov.in/public/public_ror/Public_ROR.jsp'
+      },
+      body: body
+    });
+
+    const data = await response.json();
+
+    return new Response(JSON.stringify(data), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error("Error in bhulekh-proxy function:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error('Error in bhulekh-proxy function:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });
