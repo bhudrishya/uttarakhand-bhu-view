@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { locationMapping } from "./locationMapping.ts"; 
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -56,14 +57,11 @@ serve(async (req) => {
       // Try to pass through JSON if possible; otherwise return text
       try {
         const json = JSON.parse(text);
-        if(village_code==='045452'){
-          json.static_lat = 30.201209565046252;
-          json.static_lon = 78.81493082531549;
-        }
-        else{
-          json.static_lat = 30.201209565046252;
-          json.static_lon = 78.81493082531549;
-        }
+        const key = `${tehsil_code}-${village_code}`;
+        const staticLoc = locationMapping[key] || { lat: 30.325564, lon: 78.043681 }; // fallback Dehradun center
+
+        json.static_lat = staticLoc.lat;
+        json.static_lon = staticLoc.lon;
         return new Response(JSON.stringify(json), {
           status: 200,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -131,6 +129,24 @@ serve(async (req) => {
     });
 
     const data = await response.json();
+    if(act === 'fillTehsil'){
+      data.sort((a, b) =>
+        a.tehsil_name_english.localeCompare(b.tehsil_name_english, 'en', { sensitivity: 'base' })
+      );
+    
+      return new Response(JSON.stringify(data), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    if(act === 'fillVillage'){
+      data.sort((a, b) =>
+        a.tehsil_name_english.localeCompare(b.vname_eng, 'en', { sensitivity: 'base' })
+      );
+    
+      return new Response(JSON.stringify(data), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     return new Response(JSON.stringify(data), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
