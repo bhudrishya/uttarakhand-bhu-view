@@ -72,7 +72,7 @@ const PropertyDetails = () => {
         location.state;
 
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/bhulekh-proxy/scalar?plotno=${khasra_number}&levels=${district_code}%2C${tehsil_code}%2C${village_code}%2C`
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/bhulekh-proxy/scalar?plotno=${khasra_number}&levels=${district_code}&tehsil_code=${tehsil_code}&village_code=${village_code}`
       );
 
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
