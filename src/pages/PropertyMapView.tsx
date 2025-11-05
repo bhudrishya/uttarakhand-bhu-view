@@ -120,7 +120,7 @@ const PropertyMapView = () => {
 
               {/* Info Drawer */}
               <div
-                className={`absolute bottom-4 right-4 bg-background border rounded-lg shadow-lg transition-all ${
+                className={`absolute bottom-4 left-4 bg-background border rounded-lg shadow-lg transition-all ${
                   infoCollapsed ? "w-12 h-12" : "w-80 max-h-96"
                 }`}
               >
