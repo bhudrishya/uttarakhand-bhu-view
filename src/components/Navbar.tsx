@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, MapPin, LogOut, User } from "lucide-react";
+import { Menu, X, MapPin, LogOut, User, PlusCircle, ShoppingBag } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import LoginDialog from "./LoginDialog";
@@ -41,8 +41,22 @@ const Navbar = () => {
             >
               Search Property
             </Link>
+            <Link 
+              to="/browse-listings" 
+              className={`text-sm font-medium transition-colors hover:text-primary ${
+                isActive("/browse-listings") ? "text-primary" : "text-muted-foreground"
+              }`}
+            >
+              Land Marketplace
+            </Link>
             {user ? (
               <>
+                <Link to="/post-listing">
+                  <Button variant="default" size="sm" className="gap-2">
+                    <PlusCircle className="w-4 h-4" />
+                    Post Land
+                  </Button>
+                </Link>
                 <Link to="/profile">
                   <Button variant="ghost" size="sm" className="gap-2">
                     <User className="w-4 h-4" />
@@ -89,8 +103,23 @@ const Navbar = () => {
             >
               Search Property
             </Link>
+            <Link 
+              to="/browse-listings" 
+              className={`block text-sm font-medium ${
+                isActive("/browse-listings") ? "text-primary" : "text-muted-foreground"
+              }`}
+              onClick={() => setIsOpen(false)}
+            >
+              Land Marketplace
+            </Link>
             {user ? (
               <div className="space-y-2">
+                <Link to="/post-listing">
+                  <Button variant="default" size="sm" className="w-full gap-2" onClick={() => setIsOpen(false)}>
+                    <PlusCircle className="w-4 h-4" />
+                    Post Land
+                  </Button>
+                </Link>
                 <Link to="/profile">
                   <Button variant="ghost" size="sm" className="w-full gap-2" onClick={() => setIsOpen(false)}>
                     <User className="w-4 h-4" />

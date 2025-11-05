@@ -11,6 +11,8 @@ import Search from "./pages/Search";
 import MapView from "./pages/MapView";
 import PropertyDetails from "./pages/PropertyDetails";
 import PropertyMapView from "./pages/PropertyMapView";
+import PostListing from "./pages/PostListing";
+import BrowseListings from "./pages/BrowseListings";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
@@ -123,6 +125,15 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/post-listing"
+                element={
+                  <ProtectedRoute>
+                    <PostListing />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/browse-listings" element={<BrowseListings />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<TermsOfService />} />
               <Route path="/contact" element={<Contact />} />
