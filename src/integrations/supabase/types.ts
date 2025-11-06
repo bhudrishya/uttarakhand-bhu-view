@@ -14,104 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      land_listing_photos: {
-        Row: {
-          created_at: string
-          id: string
-          is_primary: boolean
-          listing_id: string
-          photo_url: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          is_primary?: boolean
-          listing_id: string
-          photo_url: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          is_primary?: boolean
-          listing_id?: string
-          photo_url?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "land_listing_photos_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "land_listings"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      land_listings: {
-        Row: {
-          area: number
-          area_unit: string
-          contact_email: string | null
-          contact_name: string
-          contact_phone: string
-          created_at: string
-          currency: string
-          description: string | null
-          district: string
-          expected_price: number
-          id: string
-          latitude: number
-          longitude: number
-          property_type: Database["public"]["Enums"]["property_type"]
-          status: Database["public"]["Enums"]["listing_status"]
-          tehsil: string
-          updated_at: string
-          user_id: string
-          village: string
-        }
-        Insert: {
-          area: number
-          area_unit?: string
-          contact_email?: string | null
-          contact_name: string
-          contact_phone: string
-          created_at?: string
-          currency?: string
-          description?: string | null
-          district: string
-          expected_price: number
-          id?: string
-          latitude: number
-          longitude: number
-          property_type: Database["public"]["Enums"]["property_type"]
-          status?: Database["public"]["Enums"]["listing_status"]
-          tehsil: string
-          updated_at?: string
-          user_id: string
-          village: string
-        }
-        Update: {
-          area?: number
-          area_unit?: string
-          contact_email?: string | null
-          contact_name?: string
-          contact_phone?: string
-          created_at?: string
-          currency?: string
-          description?: string | null
-          district?: string
-          expected_price?: number
-          id?: string
-          latitude?: number
-          longitude?: number
-          property_type?: Database["public"]["Enums"]["property_type"]
-          status?: Database["public"]["Enums"]["listing_status"]
-          tehsil?: string
-          updated_at?: string
-          user_id?: string
-          village?: string
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           address: string
@@ -156,12 +58,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      listing_status: "active" | "sold" | "inactive"
-      property_type:
-        | "residential"
-        | "commercial"
-        | "agricultural"
-        | "industrial"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -288,14 +185,6 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {
-      listing_status: ["active", "sold", "inactive"],
-      property_type: [
-        "residential",
-        "commercial",
-        "agricultural",
-        "industrial",
-      ],
-    },
+    Enums: {},
   },
 } as const
