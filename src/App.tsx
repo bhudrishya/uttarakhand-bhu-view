@@ -30,6 +30,7 @@ const App = () => (
         {/* 🌐 Global SEO + Metadata */}
         <Helmet>
           <title>Uttarakhand BhuDrishya | Digital Land Records Portal</title>
+          <meta name="robots" content="index, follow" />
           <meta
             name="description"
             content="Access Uttarakhand's digital land records. Search properties by Khasra number, owner name, or map — powered by GIS technology for transparency and accuracy."

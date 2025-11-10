@@ -71,7 +71,7 @@ const Search = () => {
   const fetchDistricts = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/bhulekh-proxy`, {
+      const response = await fetch(`${import.meta.env.VITE_GOOGLE_PROXY}/functions/v1/bhulekh-proxy`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -90,7 +90,7 @@ const Search = () => {
   const fetchTehsils = async (districtCode: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/bhulekh-proxy`, {
+      const response = await fetch(`${import.meta.env.VITE_GOOGLE_PROXY}/functions/v1/bhulekh-proxy`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -109,7 +109,7 @@ const Search = () => {
   const fetchVillages = async (districtCode: string, tehsilCode: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/bhulekh-proxy`, {
+      const response = await fetch(`${import.meta.env.VITE_GOOGLE_PROXY}/functions/v1/bhulekh-proxy`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -139,7 +139,7 @@ const Search = () => {
 
     setLoading(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/bhulekh-proxy`, {
+      const response = await fetch(`${import.meta.env.VITE_GOOGLE_PROXY}/functions/v1/bhulekh-proxy`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

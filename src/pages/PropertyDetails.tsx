@@ -40,7 +40,7 @@ const PropertyDetails = () => {
       setLoading(true);
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/bhulekh-proxy`,
+          `${import.meta.env.VITE_GOOGLE_PROXY}/functions/v1/bhulekh-proxy`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -72,7 +72,7 @@ const PropertyDetails = () => {
         location.state;
 
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/bhulekh-proxy/scalar?plotno=${khasra_number}&levels=${district_code}&tehsil_code=${tehsil_code}&village_code=${village_code}`
+        `${import.meta.env.VITE_GOOGLE_PROXY}/functions/v1/bhulekh-proxy/scalar?plotno=${khasra_number}&levels=${district_code}&tehsil_code=${tehsil_code}&village_code=${village_code}`
       );
 
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
